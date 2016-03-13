@@ -4,6 +4,10 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.pm.PackageManager;
+//import android.database.sqlite.SQLiteDatabase;
+
+import net.sqlcipher.database.SQLiteDatabase;
+
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -29,6 +33,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,6 +71,24 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        //Init Database
+        try {
+            SQLiteDatabase.loadLibs(this);
+            File databaseFile = this.getDatabasePath("dataDemo.db");
+            databaseFile.mkdirs();
+            databaseFile.delete();
+            SQLiteDatabase database = SQLiteDatabase.openOrCreateDatabase(databaseFile,"123456",null);
+            if (null != database) {
+                database.execSQL("create table t1(a,b)");
+                database.execSQL("insert into t1(a,b) values(?,?)",new Object[]{"one for the money","two for the show"});
+            }
+        } catch (Exception ex) {
+            System.out.print(ex.getMessage());
+        }
+
+        //*********************
+
         // Set up the login form.
         mUserIDView = (AutoCompleteTextView) findViewById(R.id.userId);
         populateAutoComplete();
@@ -92,6 +115,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+
+
     }
 
     private void populateAutoComplete() {

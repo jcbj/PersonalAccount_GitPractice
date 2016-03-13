@@ -24,4 +24,8 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.2.0'
     compile 'com.android.support:design:23.2.0'
+    compile files('/Users/jc/Code/Android/PersonalAccount/libs/commons-codec.jar')
+    compile files('/Users/jc/Code/Android/PersonalAccount/libs/guava-r09.jar')
+    compile files('/Users/jc/Code/Android/PersonalAccount/libs/sqlcipher.jar')
+    compile files('libs/commons-codec.jar')
 }
