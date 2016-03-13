@@ -4,8 +4,8 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.pm.PackageManager;
-//import android.database.sqlite.SQLiteDatabase;
 
+//import android.database.sqlite.SQLiteDatabase;
 import net.sqlcipher.database.SQLiteDatabase;
 
 import android.support.annotation.NonNull;
@@ -74,15 +74,15 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         //Init Database
         try {
-            SQLiteDatabase.loadLibs(this);
-            File databaseFile = this.getDatabasePath("dataDemo.db");
-            databaseFile.mkdirs();
-            databaseFile.delete();
-            SQLiteDatabase database = SQLiteDatabase.openOrCreateDatabase(databaseFile,"123456",null);
-            if (null != database) {
-                database.execSQL("create table t1(a,b)");
-                database.execSQL("insert into t1(a,b) values(?,?)",new Object[]{"one for the money","two for the show"});
-            }
+            SQLiteDatabase.loadLibs(this);              //导入包
+            File file = getDatabasePath("data.db");     //获取数据库路径，参数："data.db"即为数据库名
+            file.mkdirs();                              //如果路径不存在则创建路径
+            file.delete();                              //删除自动创建的数据库文件，即“data.db”文件，由SQLiteDatabase来创建
+            //第二个参数："123456"，即为数据库加密所用密码，如果数据库不存在，则创建新的；如果存在则直接打开
+            SQLiteDatabase database = SQLiteDatabase.openOrCreateDatabase(file, "123456", null);
+            //如果成功，则可以开始使用数据库(database)。操作和系统自带数据库一样，没有任何区别。
+            database.execSQL("create table t1(a,b)");
+            database.execSQL("insert into t1(a,b) values(?,?)",new Object[]{"one for the money","two for the show"});
         } catch (Exception ex) {
             System.out.print(ex.getMessage());
         }
@@ -312,7 +312,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         };
 
         int ADDRESS = 0;
-        int IS_PRIMARY = 1;
+        //int IS_PRIMARY = 1;
     }
 
     /**
