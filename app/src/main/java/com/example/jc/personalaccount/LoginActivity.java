@@ -5,9 +5,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.pm.PackageManager;
 
-//import android.database.sqlite.SQLiteDatabase;
-import net.sqlcipher.database.SQLiteDatabase;
-
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -33,9 +30,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.example.jc.personalaccount.DatabaseManger.DataStoreFactory;
-
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -74,7 +68,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        GlobalData.DataStoreHelper.initDataStore(this);
+        Boolean success = GlobalData.DataStoreHelper.initDataStore(this);
+        if (!success) {
+            System.out.print("GlobalData.DataStoreHelper.initDataStore is failed.");
+        }
 
         // Set up the login form.
         mUserIDView = (AutoCompleteTextView) findViewById(R.id.userId);

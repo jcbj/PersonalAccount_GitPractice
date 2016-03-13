@@ -7,30 +7,32 @@ import net.sqlcipher.database.SQLiteDatabase;
 import java.io.File;
 
 /**
- * Created by jc on 16/3/13.
+ * Created by jc on 16/3/14.
  */
-public class SQLCipherDataStoreHelper implements IDataStoreHelper {
+public class SQLCipherHelper implements IRelationalDatabaseHelper{
 
+    //单例模式
+    private SQLCipherHelper() {
+
+    }
+
+    private static class LazyHelper {
+        private static final SQLCipherHelper INSTANCE = new SQLCipherHelper();
+    }
+
+    public static final SQLCipherHelper getInstance() {
+        return LazyHelper.INSTANCE;
+    }
+
+    //Field
     private static final String DATABASENAME = "PersonalAccount.db";
     private static final String KEYENCRYPT = "JCYOYO";
 
     private SQLiteDatabase database = null;
 
-    //单例模式
-    private SQLCipherDataStoreHelper() {
+    //implements IRelationalDatabaseHelper
 
-    }
-
-    private static class LazyHelper {
-        private static final SQLCipherDataStoreHelper INSTANCE = new SQLCipherDataStoreHelper();
-    }
-
-    public static final SQLCipherDataStoreHelper getInstance() {
-        return LazyHelper.INSTANCE;
-    }
-
-    //
-    public Boolean initDataStore(Context context) {
+    public Boolean initDatabase(Context context) {
 
         Boolean bIsSuccess = false;
 
