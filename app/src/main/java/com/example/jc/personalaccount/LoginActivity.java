@@ -33,6 +33,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.example.jc.personalaccount.DatabaseManger.DataStoreFactory;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -72,22 +74,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        //Init Database
-        try {
-            SQLiteDatabase.loadLibs(this);              //导入包
-            File file = getDatabasePath("data.db");     //获取数据库路径，参数："data.db"即为数据库名
-            file.mkdirs();                              //如果路径不存在则创建路径
-            file.delete();                              //删除自动创建的数据库文件，即“data.db”文件，由SQLiteDatabase来创建
-            //第二个参数："123456"，即为数据库加密所用密码，如果数据库不存在，则创建新的；如果存在则直接打开
-            SQLiteDatabase database = SQLiteDatabase.openOrCreateDatabase(file, "123456", null);
-            //如果成功，则可以开始使用数据库(database)。操作和系统自带数据库一样，没有任何区别。
-            database.execSQL("create table t1(a,b)");
-            database.execSQL("insert into t1(a,b) values(?,?)",new Object[]{"one for the money","two for the show"});
-        } catch (Exception ex) {
-            System.out.print(ex.getMessage());
-        }
-
-        //*********************
+        GlobalData.DataStoreHelper.initDataStore(this);
 
         // Set up the login form.
         mUserIDView = (AutoCompleteTextView) findViewById(R.id.userId);
