@@ -14,10 +14,10 @@ public class DataStoreFactory {
 
         switch (storeType) {
             case SQLCipher:
-                helper = RelationalDatabaseManage.getInstance();
+                helper = SQLCipherHelper.getInstance();
                 break;
             default:
-                helper = RelationalDatabaseManage.getInstance();
+                helper = SQLCipherHelper.getInstance();
         }
 
         return helper;
