@@ -12,5 +12,7 @@ public interface IDataStoreHelper {
     //初始化数据处理
     Boolean initDataStore(Context context);
 
+    Boolean login(String name, String password);
+
 
 }

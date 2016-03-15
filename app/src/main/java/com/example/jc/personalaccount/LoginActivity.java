@@ -3,6 +3,7 @@ package com.example.jc.personalaccount;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.app.AlertDialog;
 import android.content.pm.PackageManager;
 
 import android.support.annotation.NonNull;
@@ -194,19 +195,34 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            mAuthTask = new UserLoginTask(userID, password);
-            mAuthTask.execute((Void) null);
+
+            if (GlobalData.DataStoreHelper.login(userID,password)) {
+                new AlertDialog.Builder(this).setTitle("提示")
+                        .setMessage("欢迎" + userID)
+                        .setPositiveButton("确定", null)
+                        .show();
+            } else {
+                new AlertDialog.Builder(this).setTitle("提示")
+                        .setMessage(getString(R.string.error_incorrect_password))
+                        .setPositiveButton("确定",null)
+                        .show();
+            }
+
+            showProgress(false);
+
+//            mAuthTask = new UserLoginTask(userID, password);
+//            mAuthTask.execute((Void) null);
         }
     }
 
     private boolean isUserIDValid(String userID) {
         //TODO: Replace this with your own logic
-        return userID.length() > 4;
+        return userID.length() > 0;
     }
 
     private boolean isPasswordValid(String password) {
         //TODO: Replace this with your own logic
-        return password.length() > 4;
+        return password.length() > 0;
     }
 
     /**

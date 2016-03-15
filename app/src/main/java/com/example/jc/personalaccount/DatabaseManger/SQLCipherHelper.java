@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.example.jc.personalaccount.GlobalData;
 
+import net.sqlcipher.Cursor;
 import net.sqlcipher.database.SQLiteDatabase;
 
 import java.io.File;
@@ -33,6 +34,7 @@ public class SQLCipherHelper implements IDataStoreHelper {
     private static final String DATABASENAME = "PersonalAccount.db";
     private static final String KEYENCRYPT = "JCYOYO";
     private static final String USERIDTABLENAME = "UserIDTable";
+    private static final String SQLITE_MASTER = "sqlite_master";
 
     private SQLiteDatabase database = null;
 
@@ -40,6 +42,7 @@ public class SQLCipherHelper implements IDataStoreHelper {
 
     private void execSQL(String sql) {
         try {
+            GlobalData.log(ID + ".execSQL",GlobalData.LogType.eMessage,sql);
             this.database.execSQL(sql);
         } catch (Exception ex) {
             GlobalData.log(ID + ".execSQL", GlobalData.LogType.eException, ex.getMessage());
@@ -48,10 +51,41 @@ public class SQLCipherHelper implements IDataStoreHelper {
 
     private void execSQL(String sql, Object[] objs) {
         try {
+            GlobalData.log(ID + ".execSQLMulti", GlobalData.LogType.eMessage, sql.replace("?", "%s"));
             this.database.execSQL(sql, objs);
         } catch (Exception ex) {
             GlobalData.log(ID + ".execSQLMulti", GlobalData.LogType.eException, ex.getMessage());
         }
+    }
+
+    //selectionArgs: 只针对WHERE字句部分进行占位符替换，其它部分无效
+    private Cursor querySQL(String sql, String[] selectionArgs) {
+        Cursor cursor = null;
+        GlobalData.log(ID + ".querySQL", GlobalData.LogType.eMessage, sql.replace("?","%s"),selectionArgs);
+
+        try {
+            cursor = this.database.rawQuery(sql, selectionArgs);
+        } catch (Exception ex) {
+            GlobalData.log(ID + ".querySQL", GlobalData.LogType.eException, ex.getMessage());
+        }
+
+        return cursor;
+    }
+
+    private Boolean checkIsExist(String sql, String[] selectionArgs) {
+        try {
+            GlobalData.log(ID + ".checkIsExist", GlobalData.LogType.eMessage, sql.replace("?","%s"),selectionArgs);
+            Cursor cursor = this.querySQL(sql, selectionArgs);
+            if ((null != cursor) && (cursor.getCount() > 0))
+            {
+                return true;
+            }
+        } catch (Exception ex) {
+            GlobalData.log(ID + ".checkIsExist", GlobalData.LogType.eException, ex.getMessage());
+            return false;
+        }
+
+        return false;
     }
 
     public Boolean initDataStore(Context context) {
@@ -94,9 +128,24 @@ public class SQLCipherHelper implements IDataStoreHelper {
         return bIsSuccess;
     }
 
+    public Boolean login(String name, String password) {
+        String sql = "SELECT * FROM " + USERIDTABLENAME + " WHERE name = ? AND password = ?";
+        return this.checkIsExist(sql, new String[]{name, password});
+    }
+
     private void createUserIDTable() {
+        try {
+            String sql = "SELECT * FROM " + SQLITE_MASTER + " WHERE type = 'table' and name = '" + USERIDTABLENAME + "'";
+            if (!this.checkIsExist(sql,null)) {
+                sql = "CREATE TABLE " + USERIDTABLENAME + " (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, password TEXT, email TEXT)";
 
+                this.execSQL(sql);
 
-
+                sql = "INSERT INTO " + USERIDTABLENAME + "(name,password,email) values('jc','jc','jiangchaoplh@126.com')";
+                this.execSQL(sql);
+            }
+        } catch (Exception ex) {
+            GlobalData.log(ID + ".createUserIDTable", GlobalData.LogType.eException, ex.getMessage());
+        }
     }
 }

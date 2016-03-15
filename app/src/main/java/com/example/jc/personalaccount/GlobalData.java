@@ -20,7 +20,11 @@ public class GlobalData {
         eError
     }
 
-    public static void log(String tag, LogType logType, String format, String ...args) {
+    public static void log(String tag, LogType logType, String format) {
+        log(tag,logType,format,null);
+    }
+
+    public static void log(String tag, LogType logType, String format, String[] args) {
         if (!BuildConfig.DEBUG) {
             return;
         }
@@ -32,7 +36,7 @@ public class GlobalData {
         //String format
         String log = new String();
 
-        if (0 == args.length) {
+        if ((null == args) || (0 == args.length)) {
             log = format;
         } else {
             char[] formatChar = format.toCharArray();
