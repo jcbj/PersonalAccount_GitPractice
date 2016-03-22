@@ -8,7 +8,6 @@ import net.sqlcipher.Cursor;
 import net.sqlcipher.database.SQLiteDatabase;
 
 import java.io.File;
-import java.util.Objects;
 
 /**
  * Created by jc on 16/3/14.
@@ -73,9 +72,10 @@ public class SQLCipherHelper implements IDataStoreHelper {
     }
 
     private Boolean checkIsExist(String sql, String[] selectionArgs) {
+        Cursor cursor = null;
         try {
             GlobalData.log(ID + ".checkIsExist", GlobalData.LogType.eMessage, sql.replace("?","%s"),selectionArgs);
-            Cursor cursor = this.querySQL(sql, selectionArgs);
+            cursor = this.querySQL(sql, selectionArgs);
             if ((null != cursor) && (cursor.getCount() > 0))
             {
                 return true;
@@ -83,9 +83,34 @@ public class SQLCipherHelper implements IDataStoreHelper {
         } catch (Exception ex) {
             GlobalData.log(ID + ".checkIsExist", GlobalData.LogType.eException, ex.getMessage());
             return false;
+        } finally {
+            if (null != cursor) {
+                cursor.close();
+            }
         }
 
         return false;
+    }
+
+    private void createUserIDTable() {
+        try {
+            String sql = "SELECT * FROM " + SQLITE_MASTER + " WHERE type = 'table' and name = '" + USERIDTABLENAME + "'";
+            if (!this.checkIsExist(sql,null)) {
+                sql = "CREATE TABLE " + USERIDTABLENAME + " (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, password TEXT, email TEXT)";
+
+                this.execSQL(sql);
+
+
+                 sql = "SELECT * FROM " + SQLITE_MASTER + " WHERE type = 'table' and name = '" + USERIDTABLENAME + "'";
+                if (!this.checkIsExist(sql,null)) {
+                    GlobalData.log(ID + ".createUserIDTable", GlobalData.LogType.eMessage,"USERID TABLE not exist.");
+                }
+
+
+            }
+        } catch (Exception ex) {
+            GlobalData.log(ID + ".createUserIDTable", GlobalData.LogType.eException, ex.getMessage());
+        }
     }
 
     public Boolean initDataStore(Context context) {
@@ -98,16 +123,19 @@ public class SQLCipherHelper implements IDataStoreHelper {
         try {
             SQLiteDatabase.loadLibs(context);              //导入包
             File file = context.getDatabasePath(DATABASENAME);     //获取数据库路径，参数："data.db"即为数据库名
-            //如果路径不存在则创建路径
-            if (!file.mkdirs()) {
-                GlobalData.log(tag, GlobalData.LogType.eMessage, "Database path is mkdirs() failed.");
-            }
-            //TODO: 有待验证此处 file.delete() 的作用
-            //这个删除是什么意思，如果是删除“data.db”文件，那岂不是每次都把数据库清空了？？？
-            //但是如果没加这一句，后面创建数据库时会报错：unable to open database file.
-            //删除自动创建的数据库文件，即“data.db”文件，由SQLiteDatabase来创建
-            if (!file.delete()) {
-                GlobalData.log(tag, GlobalData.LogType.eMessage, "Database path is mkdirs() failed.");
+
+            if (!file.exists()) {
+                //如果路径不存在则创建路径
+                if (!file.mkdirs()) {
+                    GlobalData.log(tag, GlobalData.LogType.eMessage, "Database path is mkdirs() failed.");
+                }
+                //TODO: 有待验证此处 file.delete() 的作用
+                //这个删除是什么意思，如果是删除“data.db”文件，那岂不是每次都把数据库清空了？？？
+                //但是如果没加这一句，后面创建数据库时会报错：unable to open database file.
+                //删除自动创建的数据库文件，即“data.db”文件，由SQLiteDatabase来创建
+                if (!file.delete()) {
+                    GlobalData.log(tag, GlobalData.LogType.eMessage, "Database path is delete() failed.");
+                }
             }
 
             //第二个参数："123456"，即为数据库加密所用密码，如果数据库不存在，则创建新的；如果存在则直接打开
@@ -128,24 +156,20 @@ public class SQLCipherHelper implements IDataStoreHelper {
         return bIsSuccess;
     }
 
+    public void closeDataStore() {
+        this.database.close();
+    }
+
     public Boolean login(String name, String password) {
         String sql = "SELECT * FROM " + USERIDTABLENAME + " WHERE name = ? AND password = ?";
         return this.checkIsExist(sql, new String[]{name, password});
     }
 
-    private void createUserIDTable() {
-        try {
-            String sql = "SELECT * FROM " + SQLITE_MASTER + " WHERE type = 'table' and name = '" + USERIDTABLENAME + "'";
-            if (!this.checkIsExist(sql,null)) {
-                sql = "CREATE TABLE " + USERIDTABLENAME + " (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, password TEXT, email TEXT)";
+    public Boolean register(String name, String password, String email) {
 
-                this.execSQL(sql);
+        String sql = "INSERT INTO " + USERIDTABLENAME + "(name,password,email) values('" + name + "','" + password + "','" + email + "')";
+        this.execSQL(sql);
 
-                sql = "INSERT INTO " + USERIDTABLENAME + "(name,password,email) values('jc','jc','jiangchaoplh@126.com')";
-                this.execSQL(sql);
-            }
-        } catch (Exception ex) {
-            GlobalData.log(ID + ".createUserIDTable", GlobalData.LogType.eException, ex.getMessage());
-        }
+        return this.login(name,password);
     }
 }

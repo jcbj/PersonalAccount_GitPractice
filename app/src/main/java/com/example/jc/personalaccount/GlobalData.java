@@ -10,6 +10,8 @@ import com.example.jc.personalaccount.DatabaseManger.IDataStoreHelper;
  */
 public class GlobalData {
 
+    public final static String EXTRA_USERNAME = "com.example.jc.personalaccount.USERNAME";
+
     public static DataStoreFactory.DataStoreType StoreType = DataStoreFactory.DataStoreType.SQLCipher;
 
     public static IDataStoreHelper DataStoreHelper = DataStoreFactory.getDataStoreHelper(StoreType);
@@ -46,6 +48,7 @@ public class GlobalData {
                     if (j < args.length) {
                         log += args[j++];
                     }
+                    i++;
                 } else {
                     log += formatChar[i];
                 }

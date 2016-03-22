@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 
 import android.support.annotation.NonNull;
@@ -69,14 +70,22 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        Boolean success = GlobalData.DataStoreHelper.initDataStore(this);
-        if (!success) {
-            System.out.print("GlobalData.DataStoreHelper.initDataStore is failed.");
-        }
-
         // Set up the login form.
         mUserIDView = (AutoCompleteTextView) findViewById(R.id.userId);
         populateAutoComplete();
+
+        Intent intent = this.getIntent();
+        String name = intent.getStringExtra(GlobalData.EXTRA_USERNAME);
+        if (null != name) {
+            mUserIDView.setText(name);
+        } else {
+            Boolean success = GlobalData.DataStoreHelper.initDataStore(this);
+            if (!success) {
+                System.out.print("GlobalData.DataStoreHelper.initDataStore is failed.");
+            }
+        }
+
+
 
         mPasswordView = (EditText) findViewById(R.id.password);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -98,11 +107,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
         });
 
-        Button mRegisterButton = (Button) findViewById(R.id.regist_button);
+        Button mRegisterButton = (Button) findViewById(R.id.regist_transfer_button);
         mRegisterButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                setContentView(R.layout.activity_register);
+                Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+                startActivity(intent);
             }
         });
 
@@ -110,6 +120,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mProgressView = findViewById(R.id.login_progress);
 
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        GlobalData.log("LoginActivity.onDestroy", GlobalData.LogType.eMessage, "onDestroy is exec.");
+        GlobalData.DataStoreHelper.closeDataStore();
     }
 
     private void populateAutoComplete() {

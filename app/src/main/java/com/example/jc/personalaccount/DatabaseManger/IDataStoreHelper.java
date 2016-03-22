@@ -12,7 +12,11 @@ public interface IDataStoreHelper {
     //初始化数据处理
     Boolean initDataStore(Context context);
 
+    void closeDataStore();
+
     Boolean login(String name, String password);
+
+    Boolean register(String name, String password, String email);
 
 
 }
